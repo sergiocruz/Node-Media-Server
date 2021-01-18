@@ -578,10 +578,16 @@ class NodeRtmpSession {
 
   rtmpAudioHandler() {
     let payload = this.parserPacket.payload.slice(0, this.parserPacket.header.length);
+    let config = this.config.rtmp;
     let sound_format = (payload[0] >> 4) & 0x0f;
     let sound_type = payload[0] & 0x01;
     let sound_size = (payload[0] >> 1) & 0x01;
     let sound_rate = (payload[0] >> 2) & 0x03;
+
+    /**
+     * @type {EventEmitter}
+     */
+    const audioEmitter = (config && config.events && config.events.audio) || new EventEmitter();
 
     if (this.audioCodec == 0) {
       this.audioCodec = sound_format;
@@ -619,6 +625,7 @@ class NodeRtmpSession {
       this.audioProfileName = AV.getAACProfileName(info);
       this.audioSamplerate = info.sample_rate;
       this.audioChannels = info.channels;
+      audioEmitter.emit('firstByte', this)
       Logger.log(
         `[rtmp publish] Handle audio. id=${this.id} streamPath=${
         this.publishStreamPath
@@ -637,6 +644,8 @@ class NodeRtmpSession {
     packet.header.timestamp = this.parserPacket.clock;
     let rtmpChunks = this.rtmpChunksCreate(packet);
     let flvTag = NodeFlvSession.createFlvTag(packet);
+
+    audioEmitter.emit('data', packet)
 
     //cache gop
     if (this.rtmpGopCacheQueue != null) {
