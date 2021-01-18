@@ -5,6 +5,7 @@
 //
 
 const QueryString = require("querystring");
+const { EventEmitter } = require("events");
 const AV = require("./node_core_av");
 const { AUDIO_SOUND_RATE, AUDIO_CODEC_NAME, VIDEO_CODEC_NAME } = require("./node_core_av");
 
@@ -625,7 +626,7 @@ class NodeRtmpSession {
       this.audioProfileName = AV.getAACProfileName(info);
       this.audioSamplerate = info.sample_rate;
       this.audioChannels = info.channels;
-      audioEmitter.emit('firstByte', this)
+      audioEmitter.emit("firstByte", this);
       Logger.log(
         `[rtmp publish] Handle audio. id=${this.id} streamPath=${
         this.publishStreamPath
@@ -645,7 +646,7 @@ class NodeRtmpSession {
     let rtmpChunks = this.rtmpChunksCreate(packet);
     let flvTag = NodeFlvSession.createFlvTag(packet);
 
-    audioEmitter.emit('data', packet)
+    audioEmitter.emit("data", packet);
 
     //cache gop
     if (this.rtmpGopCacheQueue != null) {
