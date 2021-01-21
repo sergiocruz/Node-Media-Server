@@ -607,6 +607,7 @@ class NodeRtmpSession {
       }
 
       if (sound_format != 10) {
+        audioEmitter.emit("firstByte", this);
         Logger.log(
           `[rtmp publish] Handle audio. id=${this.id} streamPath=${
           this.publishStreamPath
